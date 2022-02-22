@@ -10,5 +10,4 @@ const con = mongoose.connection
 
 con.on('open', () => { console.log('open connection') })
 app.use('/user', userRouter)
-
 app.listen(8000, () => { console.log('listening on port 8000') })
