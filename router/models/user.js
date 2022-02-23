@@ -10,14 +10,21 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    password: {
+        type: String,
+        required: true,
+    },
     tech: {
         type: String,
         required: true,
     },
     status: {
         type: Boolean,
-        required: true,
         default: false,
+    },
+    token: {
+        type: String,
+        default: ''
     }
 
 })
