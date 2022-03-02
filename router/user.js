@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router()
-const User = require('./models/user')
+const User = require('../models/user')
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
@@ -23,8 +23,14 @@ router.post('/register', async (req, res) => {
     })
 
     try {
-        const result = await user.save()
-        res.status(200).json(result)
+        const userCheck = await User.findOne({ email: req.body.email })
+        if (userCheck) {
+            res.send("user already exists")
+        }
+        else {
+            const result = await user.save()
+            res.status(200).json(result)
+        }
     } catch (err) {
         res.send(err.message)
     }
@@ -36,19 +42,24 @@ router.post('/login', async (req, res) => {
     })
 
     try {
-        const user = await User.findOne({ email: req.body.email })
-        if (user) {
-            const passCheck = await bcrypt.compare(req.body.password, user.password)
+        const authUser = await User.findOne({ email: req.body.email })
+        if (authUser) {
+            const passCheck = await bcrypt.compare(req.body.password, authUser.password)
             if (passCheck) {
-                const token = await jwt.sign({ _id: user._id }, " OnlyAuthenticatedUserCanAccess");
-                user.token = token;
-                user.save();
-                res.status(200).json(user)
+                const token = await jwt.sign({ _id: user._id }, "OnlyAuthenticatedUserCanAccess");
+                authUser.token = token;
+                authUser.status = true;
+                authUser.save();
+                res.status(200).json(authUser);
+            }
+            else {
+                res.send("Incorrect credentials");
             }
         }
 
+
     } catch (err) {
-        res.send(err.message)
+        res.send(err)
     }
 })
 router.get('/:id', async (req, res) => {
